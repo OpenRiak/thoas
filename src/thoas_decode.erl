@@ -5,6 +5,8 @@
     {throw_error, 2}, {continue, 7}
 ]}]).
 
+-dialyzer(no_improper_lists).
+
 -export([decode/2]).
 
 % We use integers instead of atoms to take advantage of the jump table optimization
