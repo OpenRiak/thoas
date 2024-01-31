@@ -36,6 +36,7 @@ integer_test_() ->
         || {Input, Expected} <- Cases
     ].
 
+-if(?OTP_RELEASE >= 25).
 float_test_() ->
     Cases = [
         {0.0, <<"0.0">>},
@@ -49,6 +50,8 @@ float_test_() ->
         ?_assertEqual(Expected, float(Input))
         || {Input, Expected} <- Cases
     ].
+-endif.
+
 
 string_test_() ->
     Cases = [
@@ -122,10 +125,21 @@ encode_test_() ->
 types_test_() ->
     Cases =[
         {#{<<"date">> => {2023,8,7}}, <<"{\"date\":\"2023-08-07\"}">>},
-        {#{<<"datetime">> => {{2023,8,7},{19,2,24}}}, <<"{\"datetime\":\"2023-08-07T19:02:24Z\"}">>},
+        {#{<<"datetime">> => {{2023,8,7},{19,2,24}}}, <<"{\"datetime\":\"2023-08-07T19:02:24Z\"}">>}
+    ],
+    [
+        ?_assertEqual(Expected, iolist_to_binary(encode(Input, #{})))
+        || {Input, Expected} <- Cases
+    ].
+
+-if(?OTP_RELEASE >= 25).
+types_withfloat_test_() ->
+    Cases =[
         {#{<<"datetime">> => {{2023,8,7},{19,2,24.65432}}}, <<"{\"datetime\":\"2023-08-07T19:02:24.65432Z\"}">>}
     ],
     [
         ?_assertEqual(Expected, iolist_to_binary(encode(Input, #{})))
         || {Input, Expected} <- Cases
     ].
+-endif.
+    

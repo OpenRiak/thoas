@@ -5,6 +5,8 @@
     {inline, [{float, 1}, {integer, 1}, {error_invalid_byte_error, 2}]}
 ]).
 
+-dialyzer(no_improper_lists).
+
 %%% Normal reflection based API that turns Erlang terms into JSON.
 -export([encode/2]).
 
@@ -14,6 +16,15 @@
     true/0, false/0, null/0, boolean/1, integer/1, float/1, string/1,
     non_recursive_array/1, non_recursive_object/1
 ]).
+
+-if(?OTP_RELEASE >= 25).
+convert_float(Float) ->
+    erlang:float_to_binary(Float, [short]).
+-else.
+convert_float(Float) ->
+    erlang:float_to_binary(Float).
+-endif.
+
 
 %%% A boolean value as JSON.
 -spec boolean(boolean()) -> iodata().
@@ -35,7 +46,7 @@ null() -> <<"null">>.
 %%% A float in JSON format.
 -spec float(float()) -> iodata().
 float(Float) ->
-    erlang:float_to_binary(Float, [short]).
+    convert_float(Float).
 
 %%% An integer in JSON format.
 -spec integer(integer()) -> iodata().
@@ -1751,7 +1762,7 @@ value({{Y, M, D}, {H, I, S}}, Escape)
          is_integer(I) andalso I >= 0 andalso I =< 59 andalso
          is_float(S) andalso S >= 0 andalso S < 60 ->
     Dt = io_lib:format("~4..0b-~2..0b-~2..0bT~2..0b:~2..0b:~sZ",
-                       [Y, M, D, H, I, float_to_binary(S, [short])]),
+                       [Y, M, D, H, I, convert_float(S)]),
     encode_string(iolist_to_binary(Dt), Escape);
 value(Value, Escape) when is_list(Value) ->
     list(Value, Escape);
