@@ -15,6 +15,20 @@
 -define(key, 2).
 -define(object, 3).
 
+-if(?OTP_RELEASE =:= 22).
+convert_to_atom(Binary) ->
+    binary_to_atom(Binary, utf8).
+
+convert_to_existing_atom(Binary) ->
+    binary_to_existing_atom(Binary, utf8).
+-else.
+convert_to_atom(Binary) ->
+    binary_to_atom(Binary).
+
+convert_to_existing_atom(Binary) ->
+    binary_to_existing_atom(Binary).
+-endif.
+
 array(Rest, Input, Skip, Stack, StringDecode, KeyDecode) ->
     value(Rest, Input, Skip, [?array, [] | Stack], StringDecode, KeyDecode).
 
@@ -1091,12 +1105,12 @@ key_decode_function(Options) ->
 
 identity(Key) -> Key.
 
-to_atom(Key) when is_binary(Key) -> binary_to_atom(Key);
+to_atom(Key) when is_binary(Key) -> convert_to_atom(Key);
 to_atom(Key) -> Key.
 
 to_existing_atom(Key) when is_binary(Key) ->
     try
-        binary_to_existing_atom(Key)
+        convert_to_existing_atom(Key)
     catch
         error:badarg -> Key
     end;
